@@ -1,5 +1,8 @@
 package main;
 
+import entity.Player;
+import tile.TileManger;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
@@ -10,21 +13,21 @@ public class GamePanel extends JPanel implements Runnable{
     int originalTileSize = 16; // 16x16 tile
     int scale = 3;
 
-    int tileSize = originalTileSize*scale;
+    public int tileSize = originalTileSize*scale;
 
     // set how many tile are displayed on screen
-    int maxScreenCol = 16;
-    int maxScreenRow = 12;
-    int screenWidth = tileSize*maxScreenCol;
-    int screenHeight = tileSize*maxScreenRow;
+    public int maxScreenCol = 16;
+    public int maxScreenRow = 12;
+    public int screenWidth = tileSize*maxScreenCol;
+    public int screenHeight = tileSize*maxScreenRow;
 
     //frame rate (FPS)
     int FPS = 60;
-    Rectangle playerContainer = new Rectangle();
+    TileManger tileM = new TileManger(this);
+
     //player
     MouseHandler mouseH = new MouseHandler();
-    Rectangle2D r;
-
+    Player player = new Player(this, mouseH);
     // set player position
     int playerX = 100;
     int playerY = 100;
@@ -33,7 +36,7 @@ public class GamePanel extends JPanel implements Runnable{
 
     public GamePanel() {
         this.setPreferredSize(new Dimension(screenWidth, screenHeight));
-        this.setBackground(Color.cyan);
+        this.setBackground(Color.black);
         this.setDoubleBuffered(true); // improve rendering performance
         this.addMouseListener(mouseH);
         this.addMouseMotionListener(mouseH);
@@ -49,42 +52,56 @@ public class GamePanel extends JPanel implements Runnable{
     @Override
     public void run() {
         double drawInterval = 1000000000/FPS;
-        double nextDrawTime = System.nanoTime() + drawInterval;
+        double delta = 0;
+        long lastTime = System.nanoTime();
+        long CurrentTime;
+        long timer = 0;
+        int drawCount = 0;
 
         while (gameThread != null) {
 
+            CurrentTime = System.nanoTime();
+            delta += (CurrentTime - lastTime) / drawInterval;
 
-            update();
-            repaint(); // how you call paintComponent
+            timer += CurrentTime - lastTime;
+            lastTime = CurrentTime;
+
+            if (delta >= 1) {
+                update();
+                repaint(); // how you call paintComponent
+                delta--;
+                drawCount++;
+            }
+
+            if (timer >= 1000000000) {
+                System.out.println("FPS: " + drawCount);
+                drawCount = 0;
+                timer = 0;
+            }
+
         }
 
     }
 
+
     public void update() {
-        if (mouseH.mouseOnePressed && r.contains(mouseH.getMousePosition())) {
-            playerX = mouseH.getX();
-            playerY = mouseH.getY();
-            System.out.println(r);
-            //System.out.println("mouse is pressed");
-        }
+
+        player.update();
+
+
     }
 
 
     //Standard method to draw on jpanel
     public void paintComponent(Graphics g) {
-        r = new Rectangle();
-
-        r.setRect(playerX, playerY, tileSize, tileSize);
 
         super.paintComponent(g);
-        // parse to graphic 2d
+
+        // cast to graphic 2d
         // draws character currently
         Graphics2D g2 = (Graphics2D)g;
-        g2.setColor(Color.red);
-        g2.fillRect(playerX, playerY, tileSize, tileSize);
-
-        g2.draw(r);
-        //playerContainer.setRect(playerX, playerY, tileSize, tileSize);
+        tileM.draw(g2);
+        player.draw(g2);
 
 
         g2.dispose(); // saves memory by releasing system resources that it was using
