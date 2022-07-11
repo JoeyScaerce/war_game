@@ -6,7 +6,11 @@ import main.KeyHandler;
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.DataInputStream;
+import java.io.DataOutput;
+import java.io.DataOutputStream;
 import java.io.IOException;
+import java.net.Socket;
 import java.util.Objects;
 
 public class Player extends Entity{
@@ -14,12 +18,16 @@ public class Player extends Entity{
     GamePanel gp;
     KeyHandler kh;
 
+    private Socket socket;
+    private int playerId;
+
 
     public Player(GamePanel gp, KeyHandler kh) {
         this.gp = gp;
         this.kh = kh;
         setDefaultvalues();
         getPlayerImage();
+        //connectToServer();
     }
 
     public void setDefaultvalues() {
@@ -74,7 +82,7 @@ public class Player extends Entity{
     // for when we have a sprites
     public void getPlayerImage() {
         
-        try {
+        /*try {
             up1 = ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/player/")));
             up2 = ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/player/")));
             down1 = ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/player/")));
@@ -87,7 +95,7 @@ public class Player extends Entity{
             e.printStackTrace();
         } catch (Exception e) {
             e.printStackTrace();
-        }
+        }*/
 
     }
 
@@ -132,6 +140,21 @@ public class Player extends Entity{
                 break;
         }
         g2.drawImage(image, x, y, gp.tileSize, gp.tileSize, null);
+    }
+
+    // multiplayer compatibility
+    private void connectToServer() {
+        try {
+            socket = new Socket("localHost", 1000);
+            DataInputStream in = new DataInputStream(socket.getInputStream());
+            DataOutput out = new DataOutputStream(socket.getOutputStream());
+            playerId = in.readInt();
+            if (playerId == 1) {
+                System.out.println("waiting for players to connect...");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 }
