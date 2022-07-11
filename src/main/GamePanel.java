@@ -26,8 +26,9 @@ public class GamePanel extends JPanel implements Runnable{
     TileManger tileM = new TileManger(this);
 
     //player
-    MouseHandler mouseH = new MouseHandler();
-    Player player = new Player(this, mouseH);
+    //MouseHandler mouseH = new MouseHandler();
+    KeyHandler kH = new KeyHandler();
+    Player player = new Player(this, kH);
     // set player position
     int playerX = 100;
     int playerY = 100;
@@ -38,8 +39,7 @@ public class GamePanel extends JPanel implements Runnable{
         this.setPreferredSize(new Dimension(screenWidth, screenHeight));
         this.setBackground(Color.black);
         this.setDoubleBuffered(true); // improve rendering performance
-        this.addMouseListener(mouseH);
-        this.addMouseMotionListener(mouseH);
+        this.addKeyListener(kH);
         this.setFocusable(true);
     }
 
