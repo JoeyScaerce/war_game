@@ -3,7 +3,6 @@ package entity;
 import main.GamePanel;
 import main.KeyHandler;
 
-import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.DataInputStream;
@@ -11,7 +10,6 @@ import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
-import java.util.Objects;
 
 public class Player extends Entity{
 
@@ -20,20 +18,32 @@ public class Player extends Entity{
 
     private Socket socket;
     private int playerId;
+    public final int screenX;
+    public final int screenY;
 
 
+    // player constructor
     public Player(GamePanel gp, KeyHandler kh) {
         this.gp = gp;
         this.kh = kh;
+
+        // screen
+        //half point of the screen
+        screenX = gp.screenWidth / 2 - gp.tileSize / 2;
+        screenY = gp.screenHeight / 2 - gp.tileSize / 2;
+
         setDefaultvalues();
         getPlayerImage();
         //connectToServer();
     }
 
+    // sets the default value of players position, speed & direction facing at spawn.
     public void setDefaultvalues() {
-        x = 100;
-        y = 100;
-        speed = 4;
+        // if you want to start on a specific tile do (gp.tile * x of map text) & (gp.tile * y of map text)
+        worldX = 100;
+        worldY = 100;
+
+        speed = gp.worldWidth/gp.speedMod;
         direction = "down";
 
     }
@@ -42,26 +52,27 @@ public class Player extends Entity{
         keyControl();
     }
 
+    // detect key input from keyboard
     public void keyControl() {
         if (kh.upPressed || kh.downPressed || kh.leftPressed || kh.rightPressed) {
             if (kh.upPressed) {
                 direction = "up";
-                y -= speed;
+                worldY -= speed;
             }
 
             if (kh.downPressed) {
                 direction = "down";
-                y += speed;
+                worldY += speed;
             }
 
             if (kh.leftPressed) {
                 direction = "left";
-                x -= speed;
+                worldX -= speed;
             }
 
             if (kh.rightPressed) {
                 direction = "right";
-                x += speed;
+                worldX += speed;
             }
 
 
@@ -102,7 +113,7 @@ public class Player extends Entity{
     public void draw(Graphics2D g2) {
         //r.setRect(x, y, gp.tileSize, gp.tileSize);
         g2.setColor(Color.red);
-        g2.fillRect(x, y, gp.tileSize, gp.tileSize);
+        g2.fillRect(screenX, screenY, gp.tileSize, gp.tileSize);
 
         BufferedImage image = null;
         switch (direction) {
@@ -139,7 +150,7 @@ public class Player extends Entity{
                 }
                 break;
         }
-        g2.drawImage(image, x, y, gp.tileSize, gp.tileSize, null);
+        g2.drawImage(image, (int)worldX, (int)worldY, gp.tileSize, gp.tileSize, null);
     }
 
     // multiplayer compatibility
