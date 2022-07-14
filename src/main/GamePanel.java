@@ -5,7 +5,11 @@ import tile.TileManger;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.geom.Rectangle2D;
+import java.io.DataInputStream;
+import java.io.DataOutput;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.net.Socket;
 
 public class GamePanel extends JPanel implements Runnable{
 
@@ -37,7 +41,10 @@ public class GamePanel extends JPanel implements Runnable{
     MouseHandler mH = new MouseHandler(this);
     KeyHandler kH = new KeyHandler();
     public Player player = new Player(this, kH);
-    public double speedMod = worldWidth/4;
+
+    // online player
+    private Socket socket;
+    private int playerId;
 
     //Thread of the game
     Thread gameThread;
@@ -50,6 +57,7 @@ public class GamePanel extends JPanel implements Runnable{
         this.addKeyListener(kH);
         this.addMouseWheelListener(mH);
         this.setFocusable(true);
+        //connectToServer();
     }
 
     //zoom in & out function of the game
@@ -74,7 +82,7 @@ public class GamePanel extends JPanel implements Runnable{
         double newPlayerWorldY = player.worldY * multi;
 
         // without this the player with have infinity speed o-o
-        player.speed = (double) newWorldWidth / speedMod;
+        player.speed = (double) newWorldWidth / player.speedMulti();
         player.worldX = newPlayerWorldX;
         player.worldY = newPlayerWorldY;
     }
@@ -141,11 +149,34 @@ public class GamePanel extends JPanel implements Runnable{
         // draws character currently & cast to graphic 2d.
         Graphics2D g2 = (Graphics2D)g;
         tileM.draw(g2);
-        player.draw(g2);
+
+        //for (int i = 0; i < playerId; i++) {
+            player.draw(g2);
+        //}
 
 
-        g2.dispose(); // saves memory by releasing system resources that it was using
 
+
+
+
+
+        //g2.dispose(); // saves memory by releasing system resources that it was using
+
+    }
+
+    // multiplayer compatibility
+    private void connectToServer() {
+        try {
+            socket = new Socket("localHost", 1000);
+            DataInputStream in = new DataInputStream(socket.getInputStream());
+            DataOutput out = new DataOutputStream(socket.getOutputStream());
+            playerId = in.readInt();
+            if (playerId == 1) {
+                System.out.println("waiting for players to connect...");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 }

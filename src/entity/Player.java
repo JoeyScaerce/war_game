@@ -16,8 +16,7 @@ public class Player extends Entity{
     GamePanel gp;
     KeyHandler kh;
 
-    private Socket socket;
-    private int playerId;
+
     public final int screenX;
     public final int screenY;
 
@@ -37,13 +36,23 @@ public class Player extends Entity{
         //connectToServer();
     }
 
+    // changes speed base on zoom in & out
+    public double speedMulti() {
+        return (double) gp.worldWidth/4;
+    }
+
     // sets the default value of players position, speed & direction facing at spawn.
     public void setDefaultvalues() {
         // if you want to start on a specific tile do (gp.tile * x of map text) & (gp.tile * y of map text)
         worldX = 100;
         worldY = 100;
 
-        speed = gp.worldWidth/gp.speedMod;
+        System.out.println(gp.worldWidth);
+        System.out.println(speedMulti());
+        System.out.println((double) gp.worldWidth/4);
+
+        speed = gp.worldWidth/speedMulti();
+        System.out.println(speed);
         direction = "down";
 
     }
@@ -153,19 +162,5 @@ public class Player extends Entity{
         g2.drawImage(image, (int)worldX, (int)worldY, gp.tileSize, gp.tileSize, null);
     }
 
-    // multiplayer compatibility
-    private void connectToServer() {
-        try {
-            socket = new Socket("localHost", 1000);
-            DataInputStream in = new DataInputStream(socket.getInputStream());
-            DataOutput out = new DataOutputStream(socket.getOutputStream());
-            playerId = in.readInt();
-            if (playerId == 1) {
-                System.out.println("waiting for players to connect...");
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 
 }
