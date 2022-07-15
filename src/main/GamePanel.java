@@ -14,9 +14,9 @@ import java.net.Socket;
 public class GamePanel extends JPanel implements Runnable{
 
     //Screen & tile setting
-    int originalTileSize = 16; // 16x16 tile
+    public int originalTileSize = 16; // 16x16 tile
     int scale = 3;
-    public int tileSize = originalTileSize*scale;
+    public int tileSize = originalTileSize*scale; // 16*3
 
     //set how many tile are displayed on screen
     public int maxScreenCol = 16;
@@ -30,19 +30,20 @@ public class GamePanel extends JPanel implements Runnable{
     public final int maxWorldRow = 12;
     public final int worldWidth = tileSize * maxWorldCol;
     public final int worldHeight = tileSize * maxWorldRow;
+    TileManger tileM = new TileManger(this);
 
     //Performance (FPS) (Ram)
     int FPS = 60;
     long megabyte = (1024L * 1024L);
     Long Ram = (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / megabyte;
-    TileManger tileM = new TileManger(this);
 
-    //Player
+    //Player & Entity
     MouseHandler mH = new MouseHandler(this);
     KeyHandler kH = new KeyHandler();
     public Player player = new Player(this, kH);
+    public CollisionDetector cD = new CollisionDetector(this);
 
-    // online player
+    //online player
     private Socket socket;
     private int playerId;
 
@@ -96,7 +97,7 @@ public class GamePanel extends JPanel implements Runnable{
     //draw screen & character with updated information
     @Override
     public void run() {
-        double drawInterval = 1000000000/FPS;
+        double drawInterval = (double) 1000000000/FPS;
         double delta = 0;
         long lastTime = System.nanoTime();
         long CurrentTime;
@@ -160,12 +161,12 @@ public class GamePanel extends JPanel implements Runnable{
 
 
 
-        //g2.dispose(); // saves memory by releasing system resources that it was using
+        g2.dispose(); // saves memory by releasing system resources that wased being used
 
     }
 
     // multiplayer compatibility
-    private void connectToServer() {
+    /*private void connectToServer() {
         try {
             socket = new Socket("localHost", 1000);
             DataInputStream in = new DataInputStream(socket.getInputStream());
@@ -177,6 +178,6 @@ public class GamePanel extends JPanel implements Runnable{
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
+    }*/
 
 }

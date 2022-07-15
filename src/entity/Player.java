@@ -5,17 +5,11 @@ import main.KeyHandler;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.DataInputStream;
-import java.io.DataOutput;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.net.Socket;
 
 public class Player extends Entity{
 
     GamePanel gp;
     KeyHandler kh;
-
 
     public final int screenX;
     public final int screenY;
@@ -27,9 +21,13 @@ public class Player extends Entity{
         this.kh = kh;
 
         // screen
-        //half point of the screen
+        //set the view to half point of the screen
         screenX = gp.screenWidth / 2 - gp.tileSize / 2;
         screenY = gp.screenHeight / 2 - gp.tileSize / 2;
+
+        // set player collision box
+        // x & y will be broken if tile size is bigger because it wouldn't be the center. need to find better way then having static numbers
+        collisionBox = new Rectangle(8, 16, gp.tileSize - gp.originalTileSize,  gp.tileSize - gp.originalTileSize);
 
         setDefaultvalues();
         getPlayerImage();
@@ -47,43 +45,41 @@ public class Player extends Entity{
         worldX = 100;
         worldY = 100;
 
-        System.out.println(gp.worldWidth);
-        System.out.println(speedMulti());
-        System.out.println((double) gp.worldWidth/4);
-
         speed = gp.worldWidth/speedMulti();
-        System.out.println(speed);
         direction = "down";
 
     }
 
-    public void update() {
-        keyControl();
+    // check collision
+    public void collisionCheck() {
+
     }
 
-    // detect key input from keyboard
+    // keyboard input
+    public void update() {
+        keyControl();
+        collisionCheck();
+    }
+
+    // detect key input from keyboard. moves the player. & checks for collison
+    // update mouse input when I get a chance. unable to move diagonal any more only at angles
     public void keyControl() {
+        collisionOn = false;
+        gp.cD.checkTileCollision(this);
+
         if (kh.upPressed || kh.downPressed || kh.leftPressed || kh.rightPressed) {
             if (kh.upPressed) {
                 direction = "up";
-                worldY -= speed;
             }
-
             if (kh.downPressed) {
                 direction = "down";
-                worldY += speed;
             }
-
             if (kh.leftPressed) {
                 direction = "left";
-                worldX -= speed;
             }
-
             if (kh.rightPressed) {
                 direction = "right";
-                worldX += speed;
             }
-
 
             spriteCounter++;
             if (spriteCounter > 15) {
@@ -94,10 +90,35 @@ public class Player extends Entity{
                 }
                 spriteCounter = 0;
             }
+
+            if (!collisionOn) {
+                switch (direction) {
+                    case "up": worldY -= speed; break;
+                    case "down": worldY += speed; break;
+                    case "left": worldX -= speed; break;
+                    case "right": worldX += speed; break;
+                }
+            }
         }
 
 
+
+
+
     }
+
+        /*if (!collisionOn) {
+            switch (direction) {
+                case "up":
+                    break;
+                case "down":
+                    break;
+                case "left":
+                    break;
+                case "right":
+                    break;
+            }
+        }*/
 
     // for when we have a sprites
     public void getPlayerImage() {
@@ -125,6 +146,7 @@ public class Player extends Entity{
         g2.fillRect(screenX, screenY, gp.tileSize, gp.tileSize);
 
         BufferedImage image = null;
+        // switch sprite base on direction the key pressed
         switch (direction) {
             case "up":
                 if (spriteNum == 1) {

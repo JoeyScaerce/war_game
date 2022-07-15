@@ -12,18 +12,20 @@ import java.util.Objects;
 
 public class TileManger {
     GamePanel gp;
-    Tile[] tiles;
-    int mapTileNum[][];
+    public Tile[] tiles;
+    public int mapTileNum[][];
 
     public TileManger(GamePanel gp) {
         this.gp = gp;
-        tiles = new Tile[10]; // how many tiles images we want to store
+        tiles = new Tile[15]; // how many tiles images we want to store
         mapTileNum = new int[gp.maxWorldCol][gp.maxWorldRow];
 
         getTileImage();
+        //
         loadMap("/res/map/map01.txt");
     }
 
+    // get image from res & set collision if true
     public void getTileImage() {
         try {
             tiles[0] = new Tile();
@@ -31,9 +33,12 @@ public class TileManger {
 
             tiles[1] = new Tile();
             tiles[1].image = ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/res/tiles/MountainTile.png")));
+            // set tile collision
+            tiles[1].collision = true;
 
             tiles[2] = new Tile();
             tiles[2].image = ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/res/tiles/tile2.png")));
+            tiles[2].collision = true;
 
         } catch (Exception e) {
             System.out.println("error");
@@ -41,6 +46,7 @@ public class TileManger {
         }
     }
 
+    // gets information from world map text file
     public void loadMap(String path) {
         try {
             // gets the map from resources maps
